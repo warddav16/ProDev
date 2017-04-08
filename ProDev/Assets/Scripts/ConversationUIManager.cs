@@ -12,7 +12,7 @@ public class ConversationUIManager : MonoBehaviour
     public GameObject UIRoot;
     public Text SpeakerNameField;
     public Text ConversationBox;
-    public Button[] answers;
+    public Button[] AnswersButtons;
     public string PlayerName = "ShitDev";
 
     private VIDE_Data _currentDialogue;
@@ -48,6 +48,8 @@ public class ConversationUIManager : MonoBehaviour
 
     public void StartConversation(VIDE_Assign diagToLoad)
     {
+        if (_currentDialogue.isActiveAndEnabled)
+            return;
         _currentDialogue.OnActionNode += ActionHandler;
         _currentDialogue.OnNodeChange += NodeChangeAction;
         _currentDialogue.OnEnd += EndConversation;
@@ -66,14 +68,40 @@ public class ConversationUIManager : MonoBehaviour
     {
         if (data.currentIsPlayer)
         {
-            //SetOptions(data.playerComments);
             SpeakerNameField.text = PlayerName;
         }
         else
         {
             SpeakerNameField.text = _currentDialogue.assigned.dialogueName;
+            ConversationBox.text = data.npcComment[data.npcCommentIndex];
         }
-        ConversationBox.text = data.npcComment[data.npcCommentIndex];
+
+        SetAnswers(data.playerComments);
+    }
+
+    public void SetAnswers(string[] answers)
+    {
+        if( answers == null)
+        {
+            for( int i =0; i < AnswersButtons.Length; ++i)
+            {
+                AnswersButtons[i].gameObject.SetActive(false);
+            }
+            return;
+        }
+        for (int i = 0; i < answers.Length; ++i)
+        {
+            if( i >= AnswersButtons.Length)
+            {
+                Debug.LogError("Too many answers, not enough answer buttons");
+                return;
+            }
+            AnswersButtons[i].transform.GetChild(0).gameObject.GetComponent<Text>().text = answers[i];
+        }
+        for( int i = answers.Length; i < AnswersButtons.Length; ++i)
+        {
+            AnswersButtons[i].gameObject.SetActive(false);
+        }
     }
 
     public void EndConversation(VIDE_Data.NodeData data )
@@ -89,6 +117,15 @@ public class ConversationUIManager : MonoBehaviour
 
     void Update()
     {
-
+        if( _currentDialogue.isActiveAndEnabled )
+        {
+            if( !_currentDialogue.nodeData.currentIsPlayer )
+            {
+                if( Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.Return))
+                {
+                    _currentDialogue.Next();
+                }
+            }
+        }
     }
 }
