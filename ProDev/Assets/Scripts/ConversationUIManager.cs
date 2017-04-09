@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+
 public class ConversationUIManager : MonoBehaviour
 {
     static ConversationUIManager _instance;
@@ -96,6 +97,7 @@ public class ConversationUIManager : MonoBehaviour
                 Debug.LogError("Too many answers, not enough answer buttons");
                 return;
             }
+	    AnswersButtons[i].gameObject.SetActive(true);
             AnswersButtons[i].transform.GetChild(0).gameObject.GetComponent<Text>().text = answers[i];
         }
         for( int i = answers.Length; i < AnswersButtons.Length; ++i)
@@ -127,5 +129,11 @@ public class ConversationUIManager : MonoBehaviour
                 }
             }
         }
+    }
+
+    public void AnswerQuestion(uint answer)
+    {
+	_currentDialogue.nodeData.selectedOption = (int)answer;
+	_currentDialogue.Next();
     }
 }
